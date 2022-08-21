@@ -40,6 +40,7 @@ print("\n=======================================================================
 
 print('If you wish, you can check if the changes were done correctly')
 exec(open('read-info-from-db/GetCompanyInfo.py').read())
+
 #close db connection
 proddb.close()
 if(not proddb.is_connected()):
