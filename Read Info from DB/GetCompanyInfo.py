@@ -1,16 +1,17 @@
 import mysql.connector
 
 #inputs
-#DB connection
+#db connection
 proddb = mysql.connector.connect(
   host=input('Please enter host IP - '),
   user=input('Please enter user name - '),
   password=input('Please enter your password - '),
   database = input('Please enter the schema name - ')
 )
-#print(proddb.database)
+
 if(proddb.is_connected()):
-  print("\nConnection Successful")
+  print("\nConnection Successful", end = ', ')
+  print('Schema = ' + proddb.database)
 
 getCursor = proddb.cursor()
 
@@ -20,21 +21,21 @@ if(companyName == ''):
   exit()
 verboseFlg = 'y'
 
-
 #outputs
-#Read Company Info
+#read Company Info
 selectCompanies = "select * from companies where name like \"%"+companyName+"%\";"
 
 getCursor.execute(selectCompanies)
 companies = getCursor.fetchall()
 
-#Confirm if too many matching results found
+#confirm if too many matching results found
 if(len(companies)>3):
   checkResultCt = input(str(len(companies))+" results found! Do you want to continue? (Y/N) - ")
   if(checkResultCt!="Y" and checkResultCt!="y"):
     exit()
   verboseFlg = input("Would like to see Detailed info (Y/N)? - ")#Do you want to see basic or detaild info?
 
+#initialize variables
 ID = []
 Name = []
 APIToken = []
@@ -89,20 +90,16 @@ for ctr in range(len(companies)):
   print(str(LoyaltyIntegration[ctr]).rjust(6)+" Loyalty Program ID : ".ljust(24)+str(LoyaltyProgramIntegrationID[ctr]))
   print("Payment Credentials : ".ljust(30)+str(PaymentCredentialID[ctr]) )
   print("Square Merchant ID : ".ljust(30)+str(SquareMerchantID[ctr]))
-  
-
 
   #List User Info
   selectUsersInfo = "select source, count(source) from users where company_fk="+str(ID[ctr])+" group by source;"
   getCursor.execute(selectUsersInfo)
   users = getCursor.fetchall()
-
   print("Users : ".ljust(30),end="")
   print(users)
 
   # list admins 
   selectAdmins = "select email, api_token, is_disabled,id from admins where company_fk = "+str(ID[ctr]) + " order by is_disabled, created_at;";
-
   getCursor.execute(selectAdmins)
   admins = getCursor.fetchall()
 
@@ -120,23 +117,20 @@ for ctr in range(len(companies)):
   #locations
   selectLocations=""
   if(str(POSIntegration[ctr])=='SQUARE'):
-    #selectLocations = "select l.id, concat(l.name,\":$->\",s.currency_code), s.square_id, l.address, l.timezone, l.is_deleted from locations l inner join square_servers s on s.id=l.square_server_id where l.company_loc_fk = "+str(ID[ctr])+" order by l.is_deleted asc;"
     selectLocations = "select concat(l.id,' ',if(c.location_fk is null,\"\",'\u2601\'),' ',if(l.delivery_credentials_id is null,\"\",'\u2690\')), concat(l.name,\":$->\",s.currency_code), s.square_id, l.address, l.timezone, l.is_deleted from locations l inner join square_servers s on s.id=l.square_server_id left join cloud_printers c on c.location_fk = l.id where l.company_loc_fk ="+str(ID[ctr])+" order by l.is_deleted asc;"
   elif(str(POSIntegration[ctr])=='TOAST'):
-    #selectLocations = "select l.id, l.name, t.resturant_external_id, l.address, l.timezone, l.is_deleted  from locations l inner join pos_toast t on t.id=l.pos_credential_id where l.company_loc_fk = "+str(ID[ctr])+";" 
     selectLocations = "select concat(l.id,' ',if(c.location_fk is null,\"\",'\u2601\'),' ',if(l.delivery_credentials_id is null,\"\",'\u2690\')), l.name, t.resturant_external_id, l.address, l.timezone, l.is_deleted from locations l inner join pos_toast t on t.id=l.pos_credential_id left join cloud_printers c on c.location_fk = l.id where l.company_loc_fk = "+str(ID[ctr])+";  "
   elif(str(POSIntegration[ctr])=='CLOVER'):
-    #selectLocations = "select l.id, l.name, c.merchant_id, l.address, l.timezone, l.is_deleted from locations l inner join pos_clover c on c.id=l.pos_credential_id where l.company_loc_fk ="+str(ID[ctr])+";"    
     selectLocations = "select concat(l.id,' ',if(c.location_fk is null,\"\",'\u2601\'),' ',if(l.delivery_credentials_id is null,\"\",'\u2690\')), l.name, cl.merchant_id, l.address, l.timezone, l.is_deleted from locations l inner join pos_clover cl on cl.id=l.pos_credential_id left join cloud_printers c on c.location_fk = l.id where l.company_loc_fk ="+str(ID[ctr])+";"    
   else:
-    #selectLocations = "select l.id, l.name, 'NONE',l.address,l.timezone,l.is_deleted from locations l where l.company_loc_fk="+str(ID[ctr])+";"
     selectLocations = "select concat(l.id,' ',if(c.location_fk is null,\"\",'\u2601\'),' ',if(l.delivery_credentials_id is null,\"\",'\u2690\')), l.name, 'NONE',l.address,l.timezone,l.is_deleted from locations l left join cloud_printers c on c.location_fk = l.id where l.company_loc_fk="+str(ID[ctr])+";"
 
+  #cloud printers
   selectCloudPrinters = ""
-
   getCursor.execute(selectLocations)
   locations = getCursor.fetchall()
-  #print(locations)
+
+  #locations
   for ctrLoc in range(len(locations)):
     deleteLabel=""
     if(locations[ctrLoc][5]):
@@ -149,11 +143,8 @@ for ctr in range(len(companies)):
 
 
 
-
+#close connection
 proddb.close()
-
-
-
 if(not proddb.is_connected()):
   print("=====================================================================================================================================================")
   print("Successfully disconnected\n")
