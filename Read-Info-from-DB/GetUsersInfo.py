@@ -8,11 +8,11 @@ import json
 # Check for company info
 # exec(open('Read-Info-from-DB/GetCompanyInfo.py').read())
 # db connection
-db_connection_file = open('db-connection.json')
-db_connection = json.loads(db_connection_file)
+db_connection_file = open('/Users/siddharthnair/Documents/GitHub/craver-support-scripts/Read-Info-from-DB/db-connection.json')
+db_connection = json.load(db_connection_file)
 proddb = mysql.connector.connect(
   host=db_connection['host'],
-  user=db_connection['host'],
+  user=db_connection['user'],
   password=db_connection['password'],
   database = db_connection['database']
 )
@@ -21,9 +21,8 @@ if (proddb.is_connected()):
   print('Schema = ' + proddb.database)
 
 getCursor = proddb.cursor()
-exit()
 companyID = input("\nPlease enter company ID - ")
-selectUsers = 'select id, name,email,telephone,points,balance,giftcard_id from users where company_fk='+companyID+';'
+selectUsers = 'select id, name,email,telephone,points,balance,giftcard_id from users where company_fk='+companyID+' limit 20;'
 getCursor.execute(selectUsers)
 users = getCursor.fetchall()
 ct = 0
@@ -34,9 +33,8 @@ writer = csv.writer(f)
 rowArr = ['ID', 'Name', 'Email', 'Phone', 'Points',
     'Gift Card Balance', 'Wallet Balance']
 writer.writerow(rowArr)
-urlGiftCardBalance = input(
-    'Enter Gift Cards API Endpoint (please check with devs for more info) - ')
-api_token = input('Enter api_token (please check with devs for more info) - ')
+urlGiftCardBalance = db_connection["gift-card-balance-API"]
+api_token = db_connection["gift-card-api-token"]
 for user in users:
   giftCard = user[6]
   ct = ct+1

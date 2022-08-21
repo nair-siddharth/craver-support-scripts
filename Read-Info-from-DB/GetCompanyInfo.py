@@ -2,11 +2,13 @@ import mysql.connector
 
 #inputs
 #db connection
+db_connection_file = open('/Users/siddharthnair/Documents/GitHub/craver-support-scripts/Read-Info-from-DB/db-connection.json')
+db_connection = json.load(db_connection_file)
 proddb = mysql.connector.connect(
-  host=input('Please enter host IP - '),
-  user=input('Please enter user name - '),
-  password=input('Please enter your password - '),
-  database = input('Please enter the schema name - ')
+  host=db_connection['host'],
+  user=db_connection['user'],
+  password=db_connection['password'],
+  database = db_connection['database']
 )
 
 if(proddb.is_connected()):
