@@ -8,7 +8,7 @@ import json
 # Check for company info
 # exec(open('Read-Info-from-DB/GetCompanyInfo.py').read())
 # db connection
-db_connection_file = open('/Users/siddharthnair/Documents/GitHub/craver-support-scripts/Read-Info-from-DB/db-connection.json')
+db_connection_file = open('common/db-connection.json')
 db_connection = json.load(db_connection_file)
 proddb = mysql.connector.connect(
   host=db_connection['host'],
