@@ -6,7 +6,7 @@ import json
 
 # inputs
 # Check for company info
-# exec(open('Read-Info-from-DB/GetCompanyInfo.py').read())
+exec(open('Read-Info-from-DB/GetCompanyInfo.py').read())
 # db connection
 db_connection_file = open('common/db-connection.json')
 db_connection = json.load(db_connection_file)

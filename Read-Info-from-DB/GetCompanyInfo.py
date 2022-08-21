@@ -1,4 +1,3 @@
-from zlib import Z_PARTIAL_FLUSH
 import mysql.connector
 import json
 #inputs
