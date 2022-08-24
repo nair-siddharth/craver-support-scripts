@@ -96,6 +96,117 @@ if (proddb.is_connected()):
 
 getCursor = proddb.cursor()
 
-companyID = str(input('Please enter company ID - '))
+locationID = input("Please enter location ID below - ")
+diffOnly = 'n'
+val=None
+
+if(int(locationID)<2000):
+  startDate = input("Please start date of orders (YYYY-MM-DD) - ")
+  endDate = input("Please end date of orders (YYYY-MM-DD) - ")
+  diffOnly = input('Print only mismatched Status? (Y/N) - ')
+try:
+  val = (locationID,startDate,endDate)
+except:
+  val = tuple([locationID])
+  print(val)
+
+#Order Info
+selectOrdersFromCraver = "select id,orderStatus,deliveryOption,external_order_id,external_fulfillment_id,calculated_total from orders where location_fk=%s and placed_at >=%s and placed_at<=%s order by updated_at desc;"
+
+if(int(locationID)>2000):
+  selectOrdersFromCraver = "select id,orderStatus,deliveryOption,external_order_id,external_fulfillment_id,calculated_total from orders where id=%s;"
+  
+
+getCursor.execute(selectOrdersFromCraver,val)
+selectedOrders = getCursor.fetchall()
+try:
+  selectedOrders[0]
+except:
+  print("No Craver orders found")
+  proddb.close()
+  sys.exit()
+if(len(selectedOrders)>10):
+  if( input(str(len(selectedOrders))+' orders found! Do you want to continue(Y/N)? - ') =='n' ):
+    exit()
+
+externalOrderID = []
+
+for ctr in range(len(selectedOrders)):
+  externalOrderID.append(selectedOrders[ctr][3])
+
+#Square API Header + Data from Craver
+#Auth Token
+selectAuthInfo = "select pos_integration_credentials from companies where id = (select distinct company_loc_fk from locations where id="+str(locationID)+")"
+
+if(int(locationID)>2000):
+  selectAuthInfo = "select pos_integration_credentials from companies where id = (select company_ord_fk from orders where id = "+str(locationID)+");"
+
+getCursor.execute(selectAuthInfo)
+bearerToken = getCursor.fetchall()[0][0]
+bearerToken="Bearer "+bearerToken[ bearerToken.find(":") +1: ]
+
+#Square Location ID
+selectLocationExtID = "select square_id from square_servers where id = (select square_server_id from locations where id="+str(locationID)+")"
+if(int(locationID)>2000):
+  selectLocationExtID = "select square_id from square_servers where id = (select square_server_id from locations where id = (select location_fk from orders where id="+str(locationID)+"));"
+
+getCursor.execute(selectLocationExtID)
+extLocationID = getCursor.fetchall()[0][0]
+
+#Square API
+
+url = "https://connect.squareup.com/v2/orders/"
+header = {"Authorization": bearerToken}
+
+totalOrders=0
+       
+print("ID (C)".ljust(10),end="")
+print("Order Updated (S)".ljust(25),end="")
+print("Status (S)".ljust(15),end="")
+print("Status (C)".ljust(15),end="")
+print("Order ID (S)".ljust(40),end="")
+print("Total (C)".ljust(10),end="")
+print("Total (S)".ljust(10),end="\n")
 
 
+totalOrders = GetMoreThan100_Orders_OneByOne(externalOrderID,url,header,diffOnly)
+
+print("Total Orders = "+str(totalOrders))
+
+
+proddb.close()
+
+"""
+#Batch retrieval didn't work as expected, as the returned orders are not in the same order as 
+#the Order ID Array requested. This means that an additional step is required where the returned
+#orders need to be re-compared with requested order IDs to match them up (useless overhead for practical purposes)
+#For the most part, retrieving > 50 orders is pointless (for the current application)
+
+#Batch retrieval can be useful for statistical analyses
+
+remainingOrders = len(externalOrderID)
+startIndex=0
+endIndex=100
+
+while(remainingOrders>0):
+
+  if(remainingOrders>=100):
+    totalOrders = totalOrders + first100_Orders(extLocationID,externalOrderID[startIndex:endIndex],bearerToken)
+    remainingOrders = remainingOrders - (endIndex-startIndex+1)
+    startIndex = endIndex
+    endIndex = startIndex + 100
+  else:
+    totalOrders = totalOrders + first100_Orders(extLocationID,externalOrderID[startIndex:len(externalOrderID)],bearerToken)
+    remainingOrders=0
+
+  
+  print('remaining orders - '+str(remainingOrders))
+  print('Start Index - '+str(startIndex),end=',')
+  print('endIndex - '+str(endIndex))
+
+
+
+print("Total Orders = "+str(totalOrders),end=',')
+
+
+"""
