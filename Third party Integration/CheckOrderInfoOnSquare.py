@@ -134,4 +134,22 @@ externalOrderID = []
 for ctr in range(len(selectedOrders)):
   externalOrderID.append(selectedOrders[ctr][3])
 
+#Square API Header + Data from Craver
+#Auth Token
+selectAuthInfo = "select pos_integration_credentials from companies where id = (select distinct company_loc_fk from locations where id="+str(locationID)+")"
+
+if(int(locationID)>2000):
+  selectAuthInfo = "select pos_integration_credentials from companies where id = (select company_ord_fk from orders where id = "+str(locationID)+");"
+
+getCursor.execute(selectAuthInfo)
+bearerToken = getCursor.fetchall()[0][0]
+bearerToken="Bearer "+bearerToken[ bearerToken.find(":") +1: ]
+
+#Square Location ID
+selectLocationExtID = "select square_id from square_servers where id = (select square_server_id from locations where id="+str(locationID)+")"
+if(int(locationID)>2000):
+  selectLocationExtID = "select square_id from square_servers where id = (select square_server_id from locations where id = (select location_fk from orders where id="+str(locationID)+"));"
+
+getCursor.execute(selectLocationExtID)
+extLocationID = getCursor.fetchall()[0][0]
 
