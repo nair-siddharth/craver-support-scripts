@@ -98,4 +98,19 @@ getCursor = proddb.cursor()
 
 companyID = str(input('Please enter company ID - '))
 
+locationID = input("Please enter location ID below - ")
+
+diffOnly = 'n'
+val=None
+
+if(int(locationID)<2000):
+  startDate = input("Please start date of orders (YYYY-MM-DD) - ")
+  endDate = input("Please end date of orders (YYYY-MM-DD) - ")
+  diffOnly = input('Print only mismatched Status? (Y/N) - ')
+try:
+  val = (locationID,startDate,endDate)
+except:
+  val = tuple([locationID])
+  print(val)
+
 
