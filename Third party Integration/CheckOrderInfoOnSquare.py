@@ -176,7 +176,40 @@ print("Total Orders = "+str(totalOrders))
 
 proddb.close()
 
+"""
+#Batch retrieval didn't work as expected, as the returned orders are not in the same order as 
+#the Order ID Array requested. This means that an additional step is required where the returned
+#orders need to be re-compared with requested order IDs to match them up (useless overhead for practical purposes)
+#For the most part, retrieving > 50 orders is pointless (for the current application)
 
+#Batch retrieval can be useful for statistical analyses
+
+remainingOrders = len(externalOrderID)
+startIndex=0
+endIndex=100
+
+while(remainingOrders>0):
+
+  if(remainingOrders>=100):
+    totalOrders = totalOrders + first100_Orders(extLocationID,externalOrderID[startIndex:endIndex],bearerToken)
+    remainingOrders = remainingOrders - (endIndex-startIndex+1)
+    startIndex = endIndex
+    endIndex = startIndex + 100
+  else:
+    totalOrders = totalOrders + first100_Orders(extLocationID,externalOrderID[startIndex:len(externalOrderID)],bearerToken)
+    remainingOrders=0
+
+  
+  print('remaining orders - '+str(remainingOrders))
+  print('Start Index - '+str(startIndex),end=',')
+  print('endIndex - '+str(endIndex))
+
+
+
+print("Total Orders = "+str(totalOrders),end=',')
+
+
+"""
 
 if(not proddb.is_connected()):
   print("=====================================================================================================================================================")
