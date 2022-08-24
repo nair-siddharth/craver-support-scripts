@@ -1,6 +1,7 @@
 import mysql.connector
 # Check for company info
-exec(open('GetAllCompanyInfo.py').read())
+exec(open('read-info-from-db/GetCompanyInfo.py').read())
+
 # db connection
 db_connection_file = open('common/db-connection.json')
 db_connection = json.load(db_connection_file)
@@ -15,8 +16,6 @@ if (proddb.is_connected()):
   print('Schema = ' + proddb.database)
 
 getCursor = proddb.cursor()
-companyID = input("\nPlease enter company ID - ")
-
 print('====================================================================== SMS Verification ======================================================================')
 companyID = str(input('Enter Company ID - '))
 changeCount = 0
