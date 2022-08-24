@@ -96,10 +96,7 @@ if (proddb.is_connected()):
 
 getCursor = proddb.cursor()
 
-companyID = str(input('Please enter company ID - '))
-
 locationID = input("Please enter location ID below - ")
-
 diffOnly = 'n'
 val=None
 
@@ -112,5 +109,29 @@ try:
 except:
   val = tuple([locationID])
   print(val)
+
+#Order Info
+selectOrdersFromCraver = "select id,orderStatus,deliveryOption,external_order_id,external_fulfillment_id,calculated_total from orders where location_fk=%s and placed_at >=%s and placed_at<=%s order by updated_at desc;"
+
+if(int(locationID)>2000):
+  selectOrdersFromCraver = "select id,orderStatus,deliveryOption,external_order_id,external_fulfillment_id,calculated_total from orders where id=%s;"
+  
+
+getCursor.execute(selectOrdersFromCraver,val)
+selectedOrders = getCursor.fetchall()
+try:
+  selectedOrders[0]
+except:
+  print("No Craver orders found")
+  proddb.close()
+  sys.exit()
+if(len(selectedOrders)>10):
+  if( input(str(len(selectedOrders))+' orders found! Do you want to continue(Y/N)? - ') =='n' ):
+    exit()
+
+externalOrderID = []
+
+for ctr in range(len(selectedOrders)):
+  externalOrderID.append(selectedOrders[ctr][3])
 
 
