@@ -210,3 +210,9 @@ print("Total Orders = "+str(totalOrders),end=',')
 
 
 """
+
+proddb.close()
+
+if(not proddb.is_connected()):
+  print("=====================================================================================================================================================")
+  print("Successfully disconnected\n")
