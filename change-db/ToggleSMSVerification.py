@@ -1,4 +1,6 @@
 import mysql.connector
+import json
+
 # Check for company info
 exec(open('read-info-from-db/GetCompanyInfo.py').read())
 
