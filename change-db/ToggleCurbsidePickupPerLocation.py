@@ -150,7 +150,6 @@ if((enableFlg=='1') and (scope=='1')):
     print('Version updated - '+str(getCursor.rowcount))
     proddb.commit()
 
-
 print('Enable')
 # Enable - Scope = Location
 if((enableFlg=='1') and (scope=='2')):
@@ -171,3 +170,9 @@ if((enableFlg=='1') and (scope=='2')):
     getCursor.execute(updateConfigInstructions)
     print('Config updated - '+str(getCursor.rowcount))
     proddb.commit()
+
+proddb.close()
+
+if(not proddb.is_connected()):
+  print("=====================================================================================================================================================")
+  print("Successfully disconnected\n")
