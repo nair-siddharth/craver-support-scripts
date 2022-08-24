@@ -153,3 +153,31 @@ if(int(locationID)>2000):
 getCursor.execute(selectLocationExtID)
 extLocationID = getCursor.fetchall()[0][0]
 
+#Square API
+
+url = "https://connect.squareup.com/v2/orders/"
+header = {"Authorization": bearerToken}
+
+totalOrders=0
+       
+print("ID (C)".ljust(10),end="")
+print("Order Updated (S)".ljust(25),end="")
+print("Status (S)".ljust(15),end="")
+print("Status (C)".ljust(15),end="")
+print("Order ID (S)".ljust(40),end="")
+print("Total (C)".ljust(10),end="")
+print("Total (S)".ljust(10),end="\n")
+
+
+totalOrders = GetMoreThan100_Orders_OneByOne(externalOrderID,url,header,diffOnly)
+
+print("Total Orders = "+str(totalOrders))
+
+
+proddb.close()
+
+
+
+if(not proddb.is_connected()):
+  print("=====================================================================================================================================================")
+  print("Successfully disconnected\n")
